@@ -5,13 +5,35 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Mr Pushy Pusherson</title>
+    <style>
+      #intro {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      #gallery {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+      }
+
+      .cnvs {
+        margin-bottom: 20px;
+      }
+    </style>
   </head>
   <body>
-    <video id="v" width="300" height="300"></video>
-    <canvas id="c" style="positon: absolute; top: 0; left: 0;" width="300" height="300"></canvas>
+    <div id="intro">
+      <h1>Press the RED BUTTON, bro!</h1>
+      <video id="v" width="480" height="360"></video>
+    </div>
+    <div id="gallery">
+    </div>
+    <script src="http://evanw.github.io/glfx.js/glfx.js"></script>
     <script>
       var pusher = new Pusher('087e104eb546157304a9', {cluster:'eu'});
-      var button = pusher.subscribe('button-27');
+      var button = pusher.subscribe('button');
+      var gallery = document.getElementById('gallery');
 
       navigator.getUserMedia = navigator.getUserMedia ||
         navigator.webkitGetUserMedia ||
@@ -24,12 +46,50 @@
       var rotationBase = 90;
       var rotations = [0, 1, 2, 3, 4];
       var canvas = document.getElementById("c");
+      var video = document.getElementById("v");
+      var mediaOptions = { video: { width: 320, height: 180 } };
 
-      navigator.getUserMedia({ video: { width: 1280, height: 720 } },
+      var filters = [
+        { noise: [0.75] },
+        { sepia: [0.75] },
+        { vignette: [0.5, 0.5] },
+        { unsharpMask: [100, 2] },
+        { denoise: [50] },
+        { vibrance: [2] },
+        { hueSaturation: [0.7, 0.3] },
+        { triangleBlur: [20] },
+        { lensBlur: [16, 1, 1.5] },
+        { swirl: [160, 120, 160, 7.5] },
+        { bulgePinch: [160, 120, 160, 0.6] },
+        { bulgePinch: [160, 120, 160, 0.6] },
+        { ink: [0.5] },
+        { edgeWork: [3] },
+        { hexagonalPixelate: [160, 120, 10] },
+        { dotScreen: [160, 120, 1.5, 3] },
+        { colorHalftone: [160, 120, 0.25, 4] }
+      ];
+
+      function placePhoto(videoElement) {
+        var canvas = fx.canvas();
+        var randomIndex = getRandomInt(0, filters.length);
+        var filter = filters[randomIndex];
+        var filterName = Object.keys(filter)[0];
+        var filterArgs = filter[filterName];
+
+        canvas.className = 'cnvs';
+        canvas.draw(canvas.texture(videoElement), 320, 240);
+
+        canvas[filterName].apply(canvas, filterArgs);
+        canvas.update()
+
+        gallery.appendChild(canvas);
+      }
+
+      navigator.getUserMedia(mediaOptions,
         function(stream) {
-          var video = document.getElementById("v");
+          var vendorURL = window.URL || window.webkitURL;
 
-          video.src = window.webkitURL.createObjectURL(stream);
+          video.src = vendorURL.createObjectURL(stream);
           video.play();
         },
         function(err) {
@@ -39,7 +99,7 @@
 
       button
         .bind('press', function(data) {
-          canvas.getContext("2d").drawImage(video, 0, 0, 300, 300, 0, 0, 300, 300);
+          placePhoto(video);
         });
 
       button

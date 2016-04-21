@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://js.pusher.com/3.0/pusher.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Mr Pushy Pusherson</title>
+  </head>
+  <body>
+    <script>
+      var pusher = new Pusher('087e104eb546157304a9', {cluster:'eu'});
+      var button = pusher.subscribe('button-27');
+
+      button
+        .bind('press', function(data) {
+          window.navigator.vibrate(200);
+        });
+
+      button
+        .bind('release', function(data) {
+          window.navigator.vibrate(0);
+        });
+    </script>
+  </body>
+</html>

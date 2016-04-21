@@ -9,7 +9,7 @@
   <body>
     <script>
       var pusher = new Pusher('087e104eb546157304a9', {cluster:'eu'});
-      var button = pusher.subscribe('button-27');
+      var button = pusher.subscribe('button');
 
       button
         .bind('press', function(data) {
